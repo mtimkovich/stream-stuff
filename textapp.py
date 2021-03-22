@@ -1,3 +1,4 @@
+import os
 import platform
 import tkinter as tk
 from threading import Thread
@@ -5,8 +6,9 @@ import signal
 
 # Change these values as needed.
 config = {
-    'update_interval': 1,  # secs
-    'file': 'test.txt',
+    'update_interval': 60,  # secs
+    'file': 'C:/Users/mtimk/Documents/OBS/python-fitbit/maxs-hr.txt',
+    'color': '#868B98',
     'font_face': 'Arial',
     'font_size': 40,
 }
@@ -45,19 +47,16 @@ class TextApp(Thread):
     def set_transparency(self):
         """Makes the background transparent. Different for different OSes."""
         self.root.lift()
-        self.root.wm_attributes("-topmost", True)
 
         if platform.system() == 'Windows':
-            self.root.wm_attributes("-disabled", True)
-            self.root.wm_attributes("-transparentcolor", "white")
-        elif platform.system() == 'Linux':
-            self.root.wm_attributes("-alpha", 0)
+            self.root.wm_attributes("-transparentcolor", "black")
 
     def create_label(self):
         label = tk.Label(
             self.root,
             textvariable=self.sv,
-            bg='white',
+            fg=config['color'],
+            bg='blue',
             font=(config['font_face'], config['font_size']),
         ).pack()
 
@@ -66,6 +65,10 @@ def sigint_handler(sig, frame):
     app.root.update()
 
 if __name__ == '__main__':
+    cwd = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    os.chdir(cwd)
+
     app = TextApp()
     signal.signal(signal.SIGINT, sigint_handler)
 
