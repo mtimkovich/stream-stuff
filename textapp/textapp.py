@@ -1,27 +1,22 @@
+import configparser
 import os
-import platform
 import tkinter as tk
 from threading import Thread
 import signal
 
-# Change these values as needed.
-config = {
-    'update_interval': 60,  # secs
-    'file': 'C:/Users/mtimk/Documents/OBS/python-fitbit/maxs-hr.txt',
-    'color': '#868B98',
-    'font_face': 'Arial',
-    'font_size': 40,
-}
-
 class TextApp(Thread):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+
     def run(self):
         self.root = tk.Tk()
         self.root.update()
         self.root.title('TextApp')
-        self.set_transparency()
 
         self.sv = tk.StringVar()
-        self.root.after(0, self.read_file(config['update_interval']))
+        interval = int(self.config['update_interval'])
+        self.root.after(0, self.read_file(interval))
         self.create_label()
 
         self.root.mainloop()
@@ -35,8 +30,11 @@ class TextApp(Thread):
         Returns:
             A function that updates `self.sv` with the new contents of the file.
         """
-        with open(config['file']) as f:
-            content = f.read()
+        try:
+            with open(self.config['file']) as f:
+                content = f.read()
+        except IOError:
+            content = 'Could not read file.'
 
         def update_label():
             self.sv.set(content)
@@ -44,20 +42,13 @@ class TextApp(Thread):
             self.root.after(ms_wait, self.read_file(wait))
         return update_label
 
-    def set_transparency(self):
-        """Makes the background transparent. Different for different OSes."""
-        self.root.lift()
-
-        if platform.system() == 'Windows':
-            self.root.wm_attributes("-transparentcolor", "black")
-
     def create_label(self):
         label = tk.Label(
             self.root,
             textvariable=self.sv,
-            fg=config['color'],
-            bg='blue',
-            font=(config['font_face'], config['font_size']),
+            fg=self.config['fg'],
+            bg=self.config['bg'],
+            font=(self.config['font_face'], self.config['font_size']),
         ).pack()
 
 def sigint_handler(sig, frame):
@@ -69,7 +60,11 @@ if __name__ == '__main__':
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
     os.chdir(cwd)
 
-    app = TextApp()
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    config = config['textapp']
+
+    app = TextApp(config)
     signal.signal(signal.SIGINT, sigint_handler)
 
     app.start()
