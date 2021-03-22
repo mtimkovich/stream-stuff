@@ -3,7 +3,7 @@
 Twitch Studio Beta doesn't support displaying text from a file like OBS, so this is my hack around it.
 
 TextApp creates a simple window that displays text from a text file, updating every couple seconds.
-The window can then be screen shared with Twitch studio and the background color can be chroma keyed away.
+The window can then be screen shared with Twitch Studio and the background color can be chroma keyed away.
 
 ## Usage
 
